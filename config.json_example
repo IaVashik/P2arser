@@ -1,0 +1,17 @@
+{
+    "API_KEY": "<STEAM API KEY>",
+    "Tg_bot_token": "<TELEGRAM BOT API KEY>",
+    "Tg_chat_id": 000000,
+    
+    "delay": 800,
+    "Check_map_content": true,
+    "Check_map_description": true,
+    
+    "desired_content": [
+        "test",
+        "example"
+    ],
+    
+    "game_id": 620,
+    "DEBUG": false
+}
