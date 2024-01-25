@@ -29,9 +29,15 @@ async def GetWorkshopItems(url: str) -> list[WME.WorkshopItem]:
                     continue
                 workshop_urls.append(url)
 
-                map_item = WME.WorkshopItem(url)
-                maps.append(map_item)
-                debug_print(f"\033[90m{map_item.get_title()}", end=", ")
+                try:
+                    map_item = WME.WorkshopItem(url)
+                    if map_item is None:
+                        continue
+
+                    maps.append(map_item)
+                    debug_print(f"\033[90m{map_item.get_title()}", end=", ")
+                except Exception as err:
+                    print(f"\033[90m\tError: {err}!")
 
             return maps
 
@@ -70,14 +76,18 @@ async def process_workshop_items(workshop_items: list[WME.WorkshopItem]) -> bool
                     f"\tMap size: \033[90m{megabytes_value:.2f}mb\033[0m")
 
         if config["Check_map_content"] is True:
-            bsp_content = MapItem.get_file_content()
-            if bsp_content is None:
-                continue
-            bsp_content = bsp_content.decode("latin-1").lower()
-            found_words = find_desired_words(bsp_content)
-            if len(found_words) > 0:
-                await send_special_msg(MapItem, f"{log_postfix} with content found:", ", ".join(found_words))
-                continue
+            try:
+                bsp_content = MapItem.get_file_content()
+                if bsp_content is None:
+                    continue
+                    
+                bsp_content = bsp_content.decode("latin-1").lower()
+                found_words = find_desired_words(bsp_content)
+                if len(found_words) > 0:
+                    await send_special_msg(MapItem, f"{log_postfix} with content found:", ", ".join(found_words))
+                    continue
+            except:
+                debug_print("Error :<")
             
         if config["Check_map_description"] is True:
             description = MapItem.get_description()
@@ -102,7 +112,7 @@ def find_desired_words(text: str) -> list[str]:
 
 # Main function to run the program
 async def main():
-    workshop_url = f"https://steamcommunity.com/workshop/browse/?appid={config['game_id']}&browsesort="
+    workshop_url = f"https://steamcommunity.com/workshop/browse/?appid={z rj['game_id']}&browsesort="
     workshop_new_map = workshop_url + 'mostrecent'
     workshop_updated_map = workshop_url + 'lastupdated'
 
