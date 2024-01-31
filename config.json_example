@@ -4,8 +4,8 @@
     "Tg_chat_id": 000000,
     
     "delay": 800,
-    "Check_map_content": true,
-    "Check_map_description": true,
+    "check_map_content": true,
+    "check_map_description": true,
     
     "desired_content": [
         "test",
