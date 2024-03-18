@@ -19,9 +19,10 @@ class AnalyzerResult:
         
         
 class BSpAnalyzer:
-    def __init__(self, config) -> None:
+    def __init__(self, config, desired_words = []) -> None:
         self.processed = []
         self.config = config
+        self.desired_words = desired_words
         self.check_content = config.get("check_map_content")
         self.check_description = config.get("check_map_description")
     
@@ -36,8 +37,8 @@ class BSpAnalyzer:
         if map_id in self.processed and timedelta > self.config.get("delay"): 
             return None
         # TODO what is it? XD
-        elif timedelta < 800 and map_updated_time == workshop_item.get_time_created():
-            return None
+        # elif timedelta < 800 and map_updated_time == workshop_item.get_time_created():
+        #     return None
 
         self.processed.append(map_id)
 
@@ -55,9 +56,12 @@ class BSpAnalyzer:
             return AnalyzerResult(workshop_item, upload_type, "map content", desired)
             
             
-        if self.check_content and (desired := await self.check_map_description(workshop_item)):
+        if self.check_description and (desired := await self.check_map_description(workshop_item)):
             logging.info("Found a match in the item description!")
             return AnalyzerResult(workshop_item, upload_type, "item description", desired)
+        
+        if not self.check_description and not self.check_content:
+            logging.error("Both filters are disabled in the config, analyzer will never find a match!")
         
         return None
             
@@ -91,8 +95,8 @@ class BSpAnalyzer:
     
     async def _find_desired_words(self, text: str) -> list[str]:
         found_words = []
-        for desired_word in self.config["desired_content"]:
-            if desired_word.lower() in text:
+        for desired_word in self.desired_words:
+            if desired_word in text:
                 found_words.append(desired_word)
         return found_words
     
