@@ -1,5 +1,8 @@
-from bs4 import BeautifulSoup
+import logging
 import aiohttp
+from tqdm import tqdm
+from bs4 import BeautifulSoup
+
 
 import WorkshopMetadataExtract as WME
 
@@ -14,6 +17,7 @@ class WorkshopParser:
             
     
     async def get_new_items(self, url: str) -> list[WME.WorkshopItem]:
+        logging.info(f"Start parsing workshop page ({url})")
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 response.raise_for_status()
@@ -23,7 +27,7 @@ class WorkshopParser:
                 workshop_items = soup.select('.workshopItem')
                 maps = []
 
-                for item in workshop_items:
+                for item in tqdm(workshop_items):
                     url = item.select_one('.item_link')['href']
 
                     map_item = WME.WorkshopItem(url)
@@ -31,7 +35,7 @@ class WorkshopParser:
                         continue
 
                     maps.append(map_item)
-                    # print(map_item.get_title(), end=", ")
+                    logging.debug(f"* {map_item.get_title()}")
 
                 return maps
             

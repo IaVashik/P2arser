@@ -1,11 +1,14 @@
 import time
 import asyncio
+import logging
+import coloredlogs
 
 import settings
 import notification
 from WorkshopParser import WorkshopParser
-from BspAnalyzer import BSpAnalyzer
+from BspAnalyzer import BSpAnalyzer, AnalyzerResult
 
+coloredlogs.install(level='INFO', fmt="%(asctime)s | %(levelname)s | %(message)s")
 
 async def main() -> None:
     config = settings.ConfigManager("config.json")
@@ -14,17 +17,20 @@ async def main() -> None:
     analyzer = BSpAnalyzer(config)
         
     while True:
-        print("Search for new maps")
+        logging.info("Search for new maps")
         new_workshop_items = await parser.get_new_maps()
         updated_workshop_items = await parser.get_updated_maps()
         
         for map in (new_workshop_items + updated_workshop_items):
-            result = await analyzer.analys_item(map)
+            result: AnalyzerResult = await analyzer.analys_item(map)
             if result is None:
                 continue
-            await tg_bot.send(config["Tg_chat_id"], result + " todo")
+            thumbnail_url = result.item.get_preview_url()
+            await tg_bot.bot.send_photo(chat_id=config["Tg_chat_id"], caption=result.create_description(), photo=thumbnail_url)
         
         analyzer.clear_cache()
-        time.sleep(config.get("delay"))
+        delay = config.get("delay")
+        logging.info(f"Time to sleep {delay} seconds..")
+        time.sleep(delay)
         
 asyncio.run(main())
