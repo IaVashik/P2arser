@@ -35,7 +35,6 @@ class WorkshopParser:
 
                     maps.append(map_item)
                     logging.debug(f"* {map_item.get_title()}")
-                    break
 
                 return maps
             

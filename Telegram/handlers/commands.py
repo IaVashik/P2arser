@@ -118,6 +118,8 @@ async def about_handler(msg: Message):
 async def feedback_handler(msg: Message, command: CommandObject):
     if command.args is None:
         return await msg.answer("Error! Need to provide an argument" + md.hpre("/feedback {your text}"))
-    
-    await msg.answer(f"Result: TODO \n{command.args}")
+
+    # send_msg = await .send_photo(chat_id=chat_id, caption=text, photo=thumbnail_url)
+    # await msg.answer(f"Your feedback has been forwarded to the administrator of this bot, {}")
+    await msg.answer("Sorry, but it's TODO func")
     logging_info(msg, f"/feedback {command.args}")
