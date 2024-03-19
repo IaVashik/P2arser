@@ -10,21 +10,25 @@ from Workshop import P2Arser
 from Telegram import bot
 
 # * Add limits in config & update config
-coloredlogs.install(level='INFO', fmt="%(asctime)s | %(levelname)s | %(message)s")
+logger_fmt = "%(asctime)s | %(levelname)s | %(message)s"
+coloredlogs.install(level='INFO', fmt=logger_fmt)
+file_handler = logging.FileHandler('logs.log')
+file_handler.setFormatter(logging.Formatter(fmt=logger_fmt))
+logging.getLogger().addHandler(file_handler)
+
 
 async def main() -> None:
     config = settings.ConfigManager("config.json")
     tg_bot = Bot(config["Tg_bot_token"], parse_mode=ParseMode.HTML)  
    
-    await asyncio.gather(
-        P2Arser(config, tg_bot).infinity_analyze(),
-        bot.init(tg_bot)
-    )        
-
-
-if __name__ == "__main__":
     try:
-        asyncio.run(main())
-    except (KeyboardInterrupt, SystemExit):
+        await asyncio.gather(
+            P2Arser(config, tg_bot).infinity_analyze(),
+            bot.init(tg_bot)
+        )
+    except (asyncio.exceptions.CancelledError, KeyboardInterrupt) as err:
         logging.warning("Bot stopped")
         settings.UserData().save_change()
+
+if __name__ == "__main__":
+    asyncio.run(main())

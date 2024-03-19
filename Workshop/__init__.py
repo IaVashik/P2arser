@@ -40,10 +40,13 @@ class P2Arser:
         
     async def infinity_analyze(self):
         delay = self.config.get("delay")
-        while True:
-            await self.analyze()
-            logging.info(f"Time to sleep {delay} seconds..")
-            await asyncio.sleep(delay)
+        try:
+            while True:
+                await self.analyze()
+                logging.info(f"Time to sleep {delay} seconds..")
+                await asyncio.sleep(delay)
+        except (asyncio.exceptions.CancelledError, KeyboardInterrupt, asyncio.CancelledError):
+            logging.warning("P2Arser analysis stopped")
         
 
     def create_description(self, result: AnalyzerResult):

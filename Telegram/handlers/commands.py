@@ -1,7 +1,10 @@
+import logging
+
 from aiogram import Router #, F
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 from aiogram.utils import markdown as md
+
 from settings import UserData
 
 router = Router()
@@ -34,18 +37,23 @@ def parsing_args(raw_args):
     args = raw_args.args.split(" ")
     return list(map(lambda val: val.replace("_", " ").lower(), args))
 
+def logging_info(msg, command_text):
+    logging.info(f"User {msg.from_user.full_name} (id: {msg.from_user.id}) called {command_text}")
+
 
 @router.message(Command("start"))
 async def start_handler(msg: Message):
     user_data.info[str(msg.from_user.id)] = []
     user_data.save_change()
     await msg.answer(f"Welcome, {md.hbold(msg.from_user.full_name)}")
+    logging_info(msg, "/start")
 
 
 @router.message(Command("list"))
 async def get_desire_handler(msg: Message):
     user_words = user_data.info[str(msg.from_user.id)]
     await msg.answer(md.hbold("Your words: ") + "\n• " + '\n• '.join(user_words))
+    logging_info(msg, "/list")
     
 
 @router.message(Command("add"))
@@ -58,6 +66,7 @@ async def add_desire_handler(msg: Message, command: CommandObject):
     user_data.save_change()
     
     await msg.answer(md.hbold("Added the following words: ") + "\n• " + '\n• '.join(desired_words))
+    logging_info(msg, f"/add {desired_words}")
     
     
 @router.message(Command("remove"))
@@ -76,6 +85,7 @@ async def remove_desire_handler(msg: Message, command: CommandObject):
     user_data.save_change()
         
     await msg.answer(md.hbold("Removed the following words: ") + "\n• " + '\n• '.join(deleted_words))
+    logging_info(msg, f"/remove {desired_words}")
 
 
 @router.message(Command("clear"))
@@ -84,16 +94,20 @@ async def clear_handler(msg: Message):
     user_data.save_change()
     
     await msg.answer("Done!")
+    logging_info(msg, "/clear")
     
     
 @router.message(Command("help"))
 async def help_handler(msg: Message):
     await msg.answer(HELP_TEXT)
+    logging_info(msg, "/help")
+    
     
     
 @router.message(Command("about"))
 async def about_handler(msg: Message):
     await msg.answer(ABOUT_BOT)
+    logging_info(msg, "/about")
     
     
 @router.message(Command("feedback"))
@@ -102,3 +116,4 @@ async def feedback_handler(msg: Message, command: CommandObject):
         return await msg.answer("Error! Need to provide an argument" + md.hpre("/feedback {your text}"))
     
     await msg.answer(f"Result: TODO \n{command.args}")
+    logging_info(msg, f"/feedback {command.args}")
