@@ -10,6 +10,23 @@ from settings import UserData
 router = Router()
 user_data: UserData = UserData()
 
+START_INFO = f"""{md.hbold('P2Arser')} is a Telegram bot that helps you track the usage of your assets in new and updated {md.hitalic('Portal 2')} maps on the Steam Workshop.
+
+{md.hbold('Features:')}
+• {md.hbold('Add keywords')} that the bot will use to search for maps.
+• {md.hbold('Receive notifications')} when the bot finds a map containing your keywords.
+
+{md.hbold('How to start:')}
+1. {md.hbold('Add keywords')} that the bot will use to search for maps. Use the command {md.hcode('/add (keywords)')}.
+2. The bot will regularly check the Steam Workshop for new and updated maps, and will notify you if your keywords are found in the map description or in the map itself!
+
+{md.hbold('More info:')}
+
+• /about - information about P2ARCER.
+• /list - list of added keywords.
+
+{md.hbold('P2ARCER - your all-seeing eye in the world of Portal 2!')}"""
+
 HOW_TO_USE = f"""{md.hbold('How to Use:')}
 1. Add keywords to the bot using the /add (keyword) command.
 2. The bot will continuously monitor the Steam Workshop for updates.
@@ -42,20 +59,26 @@ def parsing_args(raw_args):
     return list(map(lambda val: val.replace("_", " ").lower(), args))
 
 def logging_info(msg, command_text):
-    logging.info(f"User {msg.from_user.full_name} (id: {msg.from_user.id}) called {command_text}")
+    logging.info(f"User {msg.from_user.full_name} (id: {msg.chat.id}) called {command_text}")
 
 
 @router.message(Command("start"))
 async def start_handler(msg: Message):
-    user_data.info[str(msg.from_user.id)] = []
-    user_data.save_change()
-    await msg.answer(f"Welcome, {md.hbold(msg.from_user.full_name)}")
+    id = str(msg.chat.id)
+    if id not in user_data.info:
+        user_data.info[id] = []
+        user_data.save_change()
+    
+    if msg.chat.type == "private":
+        await msg.answer(f"Welcome, {md.hbold(msg.from_user.full_name)}!\n\n{START_INFO}")
+    else:
+        await msg.answer(f"Whoa, is this a {msg.chat.type}? \nGreetings to all participants {md.hbold(msg.chat.title)}! \nTo learn more about me, use the {md.hcode('/about')} command")        
     logging_info(msg, "/start")
 
 
 @router.message(Command("list"))
 async def get_desire_handler(msg: Message):
-    user_words = user_data.info[str(msg.from_user.id)]
+    user_words = user_data.info[str(msg.chat.id)]
     await msg.answer(md.hbold("Your words: ") + "\n• " + '\n• '.join(user_words))
     logging_info(msg, "/list")
     
@@ -66,7 +89,7 @@ async def add_desire_handler(msg: Message, command: CommandObject):
         return await msg.answer("Error! Need to provide an argument" + md.hpre("/add {desired_word}, {desired_word}, ..."))
     
     desired_words = parsing_args(command)
-    id = str(msg.from_user.id)
+    id = str(msg.chat.id)
     
     # todo
     if id in user_data.info:
@@ -85,7 +108,7 @@ async def remove_desire_handler(msg: Message, command: CommandObject):
         return await msg.answer("Error! Need to provide an argument" + md.hpre("/remove {desired_word}, {desired_word}, ..."))
     
     desired_words = parsing_args(command)
-    user_words = user_data.info[str(msg.from_user.id)]
+    user_words = user_data.info[str(msg.chat.id)]
     
     deleted_words = []
     for word in desired_words:
@@ -100,7 +123,7 @@ async def remove_desire_handler(msg: Message, command: CommandObject):
 
 @router.message(Command("clear"))
 async def clear_handler(msg: Message):
-    user_data.info[str(msg.from_user.id)].clear()
+    user_data.info[str(msg.chat.id)].clear()
     user_data.save_change()
     
     await msg.answer("Done!")
