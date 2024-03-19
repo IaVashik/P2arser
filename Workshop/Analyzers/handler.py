@@ -1,10 +1,9 @@
 from typing import Union
 from settings import ConfigManager, UserData
-from Workshop.desired_words import DesiredWords
 import WorkshopMetadataExtract as WME
 
 class AnalyzerHandler:
-    def __init__(self, config: ConfigManager, desired: DesiredWords = None) -> None:
+    def __init__(self, config: ConfigManager) -> None:
         self.config = config
 
     
@@ -12,12 +11,12 @@ class AnalyzerHandler:
         pass
     
 
-    async def _find_desired_words(self, text: str) -> list[str]:
-        found_words = []
+    async def _find_desired_words(self, text: str) -> set[str]:
+        found_words = set()
         
         for desired_word in UserData().get_unique_words():
             if desired_word in text:
-                found_words.append(desired_word)
+                found_words.add(desired_word)
         
         return found_words
     
