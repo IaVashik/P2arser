@@ -33,7 +33,8 @@ class P2Arser:
             recipients = self.get_recipients(result)       
             for chat_id, found_words in recipients.items():  
                 custom_msg_text = msg_text + "Desired Words: " + md.hitalic(', '.join(found_words))
-                await self.send_info(int(chat_id), custom_msg_text, result.item.get_preview_url())
+                msg = await self.send_info(int(chat_id), custom_msg_text, result.item.get_preview_url())
+                logging.info(f"User {msg.chat.full_name} ({msg.chat.id}) got a match on the following words: {found_words}. Map Link: {result.item.map_link}")
         
         self.analyzer.clear_cache()
         
@@ -70,7 +71,8 @@ class P2Arser:
     
     async def send_info(self, chat_id, text, thumbnail_url):
         try:
-            await self.tg_bot.send_photo(chat_id=chat_id, caption=text, photo=thumbnail_url)
+            msg = await self.tg_bot.send_photo(chat_id=chat_id, caption=text, photo=thumbnail_url)
         except Exception:
             text += "\n\nWarning! Unknown exception while getting thumbnail. This item may no longer exist"
-            await self.tg_bot.send_message(chat_id=chat_id, text=text)
+            msg = await self.tg_bot.send_message(chat_id=chat_id, text=text)
+        return msg

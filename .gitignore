@@ -1,5 +1,5 @@
 venv
 __pycache__
 config.json
-toServer.bat
 users_info
+logs.log
