@@ -2,4 +2,4 @@ venv
 __pycache__
 config.json
 toServer.bat
-jsonDb
+users_info

@@ -1,12 +1,13 @@
-from aiogram import Dispatcher, Router, F
+from aiogram import Router #, F
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 from aiogram.utils import markdown as md
+from settings import UserData
 
-dp = Dispatcher()
 router = Router()
-userbase = None
+user_data: UserData = UserData()
 
+# TODO update this shit
 def parsing_args(raw_args):
     args = raw_args.args.split(" ")
     return list(map(lambda val: val.replace("_", " ").lower(), args))
@@ -14,13 +15,14 @@ def parsing_args(raw_args):
 
 @router.message(Command("start"))
 async def start_handler(msg: Message):
-    userbase.add(msg.from_user.id, [])
+    user_data.info[str(msg.from_user.id)] = []
+    user_data.save_change()
     await msg.answer(f"Welcome, {md.hbold(msg.from_user.full_name)}")
 
 
 @router.message(Command("list"))
 async def get_desire_handler(msg: Message):
-    user_words = userbase.get(msg.from_user.id)
+    user_words = user_data.info[str(msg.from_user.id)]
     await msg.answer(md.hbold("Your words: ") + "\n• " + '\n• '.join(user_words))
     
 
@@ -30,8 +32,8 @@ async def add_desire_handler(msg: Message, command: CommandObject):
         return await msg.answer("Error! Need to provide an argument" + md.hitalic("(/add <desired_word>, <desired_word>, ...)"))
     
     desired_words = parsing_args(command)
-    userbase.get(msg.from_user.id).extend(desired_words) #! there could be duplicates
-    userbase.update()
+    user_data.info[str(msg.from_user.id)].extend(desired_words) #! there could be duplicates
+    user_data.save_change()
     
     await msg.answer(md.hbold("Added the following words: ") + "\n• " + '\n• '.join(desired_words))
     
@@ -43,13 +45,3 @@ async def remove_desire_handler(msg: Message, command: CommandObject):
     
     desired_words = parsing_args(command)
     await msg.answer(f"Result: TODO {desired_words}")
-
-
-
-async def init_bot(bot, db):  
-    global userbase  # junk code meh
-    userbase = db.load_table("users")
-    
-    dp.include_router(router)
-    await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)

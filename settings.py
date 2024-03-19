@@ -1,15 +1,53 @@
 import json
 
-class ConfigManager:
-    def __init__(self, config_path: str):
-        self.config = self._read_config(config_path)
+class JsonManager:
+    def __init__(self, path) -> None:
+        self.path = path
+        self.data = self._load_data(path)
+    
+    def _load_data(self, path):
+        try:
+            with open(path, 'r') as file:
+                return json.load(file)
+        except FileNotFoundError:
+            return {}
 
-    def _read_config(self, path: str):
-        with open(path, 'r') as file:
-            return json.load(file)
-
-    def get(self, idx, default_value = None):
-            return self.config.get(idx, default_value)
+    def update(self):
+        with open(self.path, 'w') as file:
+            json.dump(self.data, file)
+            
+    def add(self, key, value):
+        self.data[str(key)] = value
+        self.update()
+        
+    def get(self, key):
+        return self.data.get(str(key), None)
     
     def __getitem__(self, idx):
         return self.get(idx)
+    
+    
+# todo!
+class ConfigManager(JsonManager):
+    pass
+    
+
+class UserData(object):
+    def __new__(cls) -> object:
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(UserData, cls).__new__(cls)
+        return cls.instance
+    
+    def __init__(self) -> None:
+        self.json = JsonManager("users_info")
+        self.info = self.json.data
+        
+    def save_change(self):
+        self.json.update()
+        
+    def get_unique_words(self):
+        all_words = set()
+        for value in self.info.values():
+            all_words.update(value)
+        
+        return all_words

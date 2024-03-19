@@ -2,8 +2,6 @@ import logging
 import aiohttp
 from tqdm import tqdm
 from bs4 import BeautifulSoup
-
-
 import WorkshopMetadataExtract as WME
 
 
@@ -11,6 +9,7 @@ class WorkshopParser:
     def __init__(self, api_key, game_id) -> None:
         WME.set_api_key(api_key)
         
+        # todo?
         workshop_url = f"https://steamcommunity.com/workshop/browse/?appid={game_id}&browsesort="
         self.new_map_url = workshop_url + 'mostrecent'
         self.updated_map_url = workshop_url + 'lastupdated'
@@ -36,6 +35,7 @@ class WorkshopParser:
 
                     maps.append(map_item)
                     logging.debug(f"* {map_item.get_title()}")
+                    break
 
                 return maps
             
