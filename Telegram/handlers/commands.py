@@ -7,7 +7,29 @@ from settings import UserData
 router = Router()
 user_data: UserData = UserData()
 
-# TODO update this shit
+HELP_TEXT = """/help - Displays information about the bot and its available commands.
+/add - Adds a keyword to the user's list of keywords. The bot will then search for items in the Steam Workshop that match these keywords.
+/remove - Removes a keyword from the user's list of keywords.
+/list - Displays all the keywords that the user has added.
+/about - Displays information about the bot's developers and contact information.
+/feedback - Sends feedback to the bot's developers."""
+
+
+ABOUT_BOT = f"""{md.hbold('P2ARCER')} is a Telegram bot that helps Portal 2 players discover new and updated maps in the Steam Workshop based on keywords. This can be useful if you want to know immediately about the usage of your assets, hehe.
+
+{md.hbold('How to Use:')}
+1. Add keywords to the bot using the /add (keyword) command.
+2. The bot will continuously monitor the Steam Workshop for updates.
+3. When a map containing your keywords is found, you'll receive a notification via Telegram.
+
+{md.hbold('Additional Information::')}
+• Created by {md.hbold('laVashik')} ({md.hlink('GitHub', 'https://github.com/IaVashik')}, {md.hlink('YouTube', 'https://www.youtube.com/@laVashikProductions')})
+• View the source code and learn more about installation on the project's {md.hlink('GitHub repository', 'https://github.com/IaVashik/P2arser')}.
+
+From a modder for modders!
+"""
+
+
 def parsing_args(raw_args):
     args = raw_args.args.split(" ")
     return list(map(lambda val: val.replace("_", " ").lower(), args))
@@ -29,7 +51,7 @@ async def get_desire_handler(msg: Message):
 @router.message(Command("add"))
 async def add_desire_handler(msg: Message, command: CommandObject):
     if command.args is None:
-        return await msg.answer("Error! Need to provide an argument" + md.hitalic("(/add <desired_word>, <desired_word>, ...)"))
+        return await msg.answer("Error! Need to provide an argument" + md.hpre("/add {desired_word}, {desired_word}, ..."))
     
     desired_words = parsing_args(command)
     user_data.info[str(msg.from_user.id)].extend(desired_words) #! there could be duplicates
@@ -41,7 +63,42 @@ async def add_desire_handler(msg: Message, command: CommandObject):
 @router.message(Command("remove"))
 async def remove_desire_handler(msg: Message, command: CommandObject):
     if command.args is None:
-        return await msg.answer("Error! Need to provide an argument (/remove <desired_word>, <desired_word>, ...)")
+        return await msg.answer("Error! Need to provide an argument" + md.hpre("/remove {desired_word}, {desired_word}, ..."))
     
     desired_words = parsing_args(command)
-    await msg.answer(f"Result: TODO {desired_words}")
+    user_words = user_data.info[str(msg.from_user.id)]
+    
+    deleted_words = []
+    for word in desired_words:
+        if word in user_words:
+            user_words.remove(word)
+            deleted_words.append(word)
+    user_data.save_change()
+        
+    await msg.answer(md.hbold("Removed the following words: ") + "\n• " + '\n• '.join(deleted_words))
+
+
+@router.message(Command("clear"))
+async def clear_handler(msg: Message):
+    user_data.info[str(msg.from_user.id)].clear()
+    user_data.save_change()
+    
+    await msg.answer("Done!")
+    
+    
+@router.message(Command("help"))
+async def help_handler(msg: Message):
+    await msg.answer(HELP_TEXT)
+    
+    
+@router.message(Command("about"))
+async def about_handler(msg: Message):
+    await msg.answer(ABOUT_BOT)
+    
+    
+@router.message(Command("feedback"))
+async def feedback_handler(msg: Message, command: CommandObject):
+    if command.args is None:
+        return await msg.answer("Error! Need to provide an argument" + md.hpre("/feedback {your text}"))
+    
+    await msg.answer(f"Result: TODO \n{command.args}")
