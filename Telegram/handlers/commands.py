@@ -10,20 +10,24 @@ from settings import UserData
 router = Router()
 user_data: UserData = UserData()
 
-HELP_TEXT = """/help - Displays information about the bot and its available commands.
+HOW_TO_USE = f"""{md.hbold('How to Use:')}
+1. Add keywords to the bot using the /add (keyword) command.
+2. The bot will continuously monitor the Steam Workshop for updates.
+3. When a map containing your keywords is found, you'll receive a notification via Telegram."""
+
+HELP_TEXT = f"""/help - Displays information about the bot and its available commands.
 /add - Adds a keyword to the user's list of keywords. The bot will then search for items in the Steam Workshop that match these keywords.
 /remove - Removes a keyword from the user's list of keywords.
 /list - Displays all the keywords that the user has added.
 /about - Displays information about the bot's developers and contact information.
-/feedback - Sends feedback to the bot's developers."""
+/feedback - Sends feedback to the bot's developers.
+
+{HOW_TO_USE}"""
 
 
-ABOUT_BOT = f"""{md.hbold('P2ARCER')} is a Telegram bot that helps Portal 2 players discover new and updated maps in the Steam Workshop based on keywords. This can be useful if you want to know immediately about the usage of your assets, hehe.
+ABOUT_BOT = f"""{md.hbold('P2ARCER')} (pArser + Portal 2 = P2Arser) is a Telegram bot that helps Portal 2 players discover new and updated maps in the Steam Workshop based on keywords. This can be useful if you want to know immediately about the usage of your assets, hehe.
 
-{md.hbold('How to Use:')}
-1. Add keywords to the bot using the /add (keyword) command.
-2. The bot will continuously monitor the Steam Workshop for updates.
-3. When a map containing your keywords is found, you'll receive a notification via Telegram.
+{HOW_TO_USE}
 
 {md.hbold('Additional Information::')}
 • Created by {md.hbold('laVashik')} ({md.hlink('GitHub', 'https://github.com/IaVashik')}, {md.hlink('YouTube', 'https://www.youtube.com/@laVashikProductions')})
