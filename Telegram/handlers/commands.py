@@ -66,8 +66,14 @@ async def add_desire_handler(msg: Message, command: CommandObject):
         return await msg.answer("Error! Need to provide an argument" + md.hpre("/add {desired_word}, {desired_word}, ..."))
     
     desired_words = parsing_args(command)
-    user_data.info[str(msg.from_user.id)].extend(desired_words) #! there could be duplicates
-    user_data.save_change()
+    id = str(msg.from_user.id)
+    
+    # todo
+    if id in user_data.info:
+        user_data.info[id].extend(desired_words) #! there could be duplicates
+        user_data.save_change()
+    else:
+        logging.error("No user info? Huh?")
     
     await msg.answer(md.hbold("Added the following words: ") + "\n• " + '\n• '.join(desired_words))
     logging_info(msg, f"/add {desired_words}")

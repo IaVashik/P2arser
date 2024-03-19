@@ -9,7 +9,7 @@ from .handler import AnalyzerHandler
 class BspAnalyzer(AnalyzerHandler):
     async def analyze(self, workshop_item: WME.WorkshopItem) -> Union[list[str], None]:
         logging.debug(f"Bsp Analyzer Handler: start download bsp content ({workshop_item.get_filename()})")
-        url = self.get_file_url()
+        url = workshop_item.get_file_url()
         if url is None:
             return False
 
