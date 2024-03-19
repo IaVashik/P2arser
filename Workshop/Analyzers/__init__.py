@@ -48,7 +48,7 @@ class Analyzer:
         upload_type = get_item_type(workshop_item)
         megabytes_value = workshop_item.get_file_size() / 1024 / 1024
         
-        logging.info(f"BSP Analyzer ({upload_type}): \033[33m{workshop_item.get_title()}\033[0m")
+        logging.info(f"Main Analyzer ({upload_type}): \033[33m{workshop_item.get_title()}\033[0m")
         logging.debug(f"\ttimedelta: \033[90m{abs(timedelta)} seconds\033[0m\n"
                     f"\tUpload time: \033[90m{workshop_item.get_time_created()}\033[0m\n"
                     f"\tUpdate time: \033[90m{map_updated_time}\033[0m\n"
@@ -57,7 +57,7 @@ class Analyzer:
         # todo comment
         for handler in self.analyzers:
             if handler and (result := await handler.analyze(workshop_item)):
-                logging.info(f"Found a match in the {handler}!")
+                logging.info(f"Main Analyzer: Found a match in the {handler}!")
                 return AnalyzerResult(workshop_item, upload_type, str(handler), result)
         
     

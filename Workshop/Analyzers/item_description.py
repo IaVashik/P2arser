@@ -1,9 +1,11 @@
+import logging
 from typing import Union
 import WorkshopMetadataExtract as WME
 from .handler import AnalyzerHandler
 
 class DescriptionAnalyzer(AnalyzerHandler):
     async def analyze(self, workshop_item: WME.WorkshopItem) -> Union[list[str], None]:
+        logging.debug(f"Description Analyzer Handler: start download bsp content ({workshop_item.get_filename()})")
         description = workshop_item.get_description()
         if description is None:
             return False
