@@ -1,5 +1,6 @@
 import logging
 import aiohttp
+from tqdm import tqdm
 
 from typing import Union
 import WorkshopMetadataExtract as WME
@@ -13,16 +14,17 @@ class BspAnalyzer(AnalyzerHandler):
         if url is None:
             return False
 
-        async with aiohttp.ClientSession() as session: # TODO! What if the map weighs too much -> crash
+        async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 if response.status == 200:
-                    bsp_content = await response.read()
+                    found_words = set()
+                    async for chunk in response.content.iter_chunked(1024 * 1024 * 64):
+                        bsp_content = chunk.decode("latin-1").lower()
+                        found_words.update(await self._find_desired_words(bsp_content))
                 else:
                     print(f"File upload error. Status code: {response.status}")
                     return False
-        
-        bsp_content = bsp_content.decode("latin-1").lower() # uuught todo optimize it
-        found_words = await self._find_desired_words(bsp_content)
+
         if len(found_words) > 0:
             return found_words
     
