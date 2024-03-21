@@ -29,7 +29,11 @@ class WorkshopParser:
                 for item in tqdm(workshop_items):
                     url = item.select_one('.item_link')['href']
 
-                    map_item = WME.WorkshopItem(url)
+                    try:
+                        map_item = WME.WorkshopItem(url)
+                    except Exception:
+                        continue
+                    
                     if map_item is None:
                         continue
 
