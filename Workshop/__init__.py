@@ -16,7 +16,7 @@ class P2Arser:
         self.config = config
         self.tg_bot = tg_bot
         
-        self.parser = WorkshopParser(self.config["API_KEY"], self.config["game_id"]) # todo
+        self.parser = WorkshopParser(self.config["steam_api_key"], self.config["game_id"])
         self.analyzer = Analyzer(self.config)
         
     

@@ -6,8 +6,8 @@ import WorkshopMetadataExtract as WME
 
 
 class WorkshopParser:
-    def __init__(self, api_key, game_id) -> None:
-        WME.set_api_key(api_key)
+    def __init__(self, steam_api_key, game_id) -> None:
+        WME.set_api_key(steam_api_key)
         
         # todo?
         workshop_url = f"https://steamcommunity.com/workshop/browse/?appid={game_id}&browsesort="

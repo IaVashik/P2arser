@@ -63,10 +63,7 @@ def logging_info(msg, command_text):
 
 
 @router.message(Command("start"))
-async def start_handler(msg: Message):
-    id = str(msg.chat.id)
-    user_data.setdefault(id, [])
-    
+async def start_handler(msg: Message):    
     if msg.chat.type == "private":
         await msg.answer(f"Welcome, {md.hbold(msg.from_user.full_name)}!\n\n{START_INFO}")
     else:

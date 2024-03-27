@@ -19,7 +19,7 @@ logging.getLogger().addHandler(file_handler)
 
 async def main() -> None:
     config = json_controller.ConfigManager("config.json")
-    tg_bot = Bot(config["Tg_bot_token"], parse_mode=ParseMode.HTML)  
+    tg_bot = Bot(config["tg_bot_token"], parse_mode=ParseMode.HTML)  
    
     try:
         await asyncio.gather(

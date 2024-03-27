@@ -24,8 +24,8 @@ pip install -r requirements.txt
 
 Key | Description
 --|--
-API_KEY | Steam API key
-Tg_bot_token | Telegram bot API token 
+steam_api_key | Steam API key
+tg_bot_token | Telegram bot API token 
 Tg_chat_id | Telegram chat ID to send notifications
 delay | Workshop check interval in seconds
 Check_map_content | Search words in map content (true/false)
