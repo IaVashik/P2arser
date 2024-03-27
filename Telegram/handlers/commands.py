@@ -5,7 +5,7 @@ from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 from aiogram.utils import markdown as md
 
-from settings import UserData
+from json_controller import UserData
 
 router = Router()
 user_data: UserData = UserData()
@@ -65,20 +65,20 @@ def logging_info(msg, command_text):
 @router.message(Command("start"))
 async def start_handler(msg: Message):
     id = str(msg.chat.id)
-    if id not in user_data.info:
-        user_data.info[id] = []
+    if id not in user_data:
+        user_data[id] = []
         user_data.save_change()
     
     if msg.chat.type == "private":
         await msg.answer(f"Welcome, {md.hbold(msg.from_user.full_name)}!\n\n{START_INFO}")
     else:
-        await msg.answer(f"Whoa, is this a {msg.chat.type}? \nGreetings to all participants {md.hbold(msg.chat.title)}! \nTo learn more about me, use the {md.hcode('/about')} command")        
+        await msg.answer(f"Whoa, is this a {msg.chat.type}? \nGreetings to all participants {md.hbold(msg.chat.title)}! \nTo learn more about me, use the /about command")        
     logging_info(msg, "/start")
 
 
 @router.message(Command("list"))
 async def get_desire_handler(msg: Message):
-    user_words = user_data.info[str(msg.chat.id)]
+    user_words = user_data[str(msg.chat.id)]
     await msg.answer(md.hbold("Your words: ") + "\n• " + '\n• '.join(user_words))
     logging_info(msg, "/list")
     
@@ -92,8 +92,8 @@ async def add_desire_handler(msg: Message, command: CommandObject):
     id = str(msg.chat.id)
     
     # todo
-    if id in user_data.info:
-        user_data.info[id].extend(desired_words) #! there could be duplicates
+    if id in user_data:
+        user_data[id].extend(desired_words) #! there could be duplicates
         user_data.save_change()
     else:
         logging.error("No user info? Huh?")
@@ -108,7 +108,7 @@ async def remove_desire_handler(msg: Message, command: CommandObject):
         return await msg.answer("Error! Need to provide an argument" + md.hpre("/remove {desired_word}, {desired_word}, ..."))
     
     desired_words = parsing_args(command)
-    user_words = user_data.info[str(msg.chat.id)]
+    user_words = user_data[str(msg.chat.id)]
     
     deleted_words = []
     for word in desired_words:
@@ -123,7 +123,7 @@ async def remove_desire_handler(msg: Message, command: CommandObject):
 
 @router.message(Command("clear"))
 async def clear_handler(msg: Message):
-    user_data.info[str(msg.chat.id)].clear()
+    user_data[str(msg.chat.id)].clear()
     user_data.save_change()
     
     await msg.answer("Done!")

@@ -4,14 +4,14 @@ import asyncio
 from aiogram import Bot
 from aiogram.utils import markdown as md
 
-import settings
+import json_controller
 
 from .workshop_parser import WorkshopParser
 from .Analyzers import Analyzer, AnalyzerResult
 
 
 class P2Arser:
-    def __init__(self, config: settings.ConfigManager, tg_bot: Bot) -> None:
+    def __init__(self, config, tg_bot: Bot) -> None:
         self.config = config
         self.tg_bot = tg_bot
         
@@ -58,7 +58,7 @@ class P2Arser:
         
         
     def get_recipients(self, found_words: AnalyzerResult):
-        user_words = settings.UserData().info
+        user_words = json_controller.UserData().data
         result = {}
 
         for user_id, words in user_words.items():

@@ -2,9 +2,9 @@ import logging
 import datetime
 import WorkshopMetadataExtract as WME
 
-from settings import ConfigManager
+from json_controller import ConfigManager
 
-from .handlers import handler
+from .handlers.handler import AnalyzerHandler
 from .handlers import item_bsp
 from .handlers import item_description
 
@@ -22,7 +22,7 @@ class Analyzer:
         self.config = config
         self.processed = []
         
-        self.analyzers: list[handler.AnalyzerHandler] = [
+        self.analyzers: list[AnalyzerHandler] = [
             item_bsp.BspAnalyzer(config).is_valid(),
             item_description.DescriptionAnalyzer(config).is_valid()
         ]
@@ -65,5 +65,5 @@ class Analyzer:
     def clear_cache(self):
         self.processed.clear()
 
-    def add_analyzer(self, handler: handler.AnalyzerHandler):
+    def add_analyzer(self, handler: AnalyzerHandler):
         self.analyzers.append(handler.is_valid())

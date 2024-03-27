@@ -21,16 +21,16 @@ class JsonManager:
         self.update()
         
     def get(self, key):
-        return self.data.get(str(key), None)
+        return self.data.get(key, None)
     
     def __getitem__(self, idx):
         return self.get(idx)
     
     
-# todo!
+
 class ConfigManager(JsonManager):
     pass
-    
+
 
 class UserData(object):
     def __new__(cls) -> object:
@@ -40,14 +40,20 @@ class UserData(object):
     
     def __init__(self) -> None:
         self.json = JsonManager("users_info")
-        self.info = self.json.data
+        self.data = self.json.data
         
     def save_change(self):
         self.json.update()
         
     def get_unique_words(self):
         all_words = set()
-        for value in self.info.values():
+        for value in self.data.values():
             all_words.update(value)
         
         return all_words
+    
+    def get(self, key):
+        return self.data.get(str(key), None)
+    
+    def __getitem__(self, idx):
+        return self.get(idx)

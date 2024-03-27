@@ -1,5 +1,5 @@
 from typing import Union
-from settings import ConfigManager, UserData
+from json_controller import ConfigManager, UserData
 import WorkshopMetadataExtract as WME
 
 class AnalyzerHandler:
