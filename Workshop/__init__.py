@@ -1,6 +1,7 @@
 import logging
 import asyncio
 
+from aiohttp.client_exceptions import ClientResponseError
 from aiogram import Bot
 from aiogram.utils import markdown as md
 
@@ -19,10 +20,14 @@ class P2Arser:
         self.analyzer = Analyzer(self.config)
         
     
-    async def analyze(self):
+    async def analyze(self) -> bool:
         logging.info("Search for new maps")
-        new_workshop_items = await self.parser.get_new_maps()
-        updated_workshop_items = await self.parser.get_updated_maps()
+        try:
+            new_workshop_items = await self.parser.get_new_maps()
+            updated_workshop_items = await self.parser.get_updated_maps()
+        except ClientResponseError as err:
+            logging.warning(f"Error when parsing a page! ({err})")
+            return False
         
         for map in set(new_workshop_items + updated_workshop_items):
             result: AnalyzerResult = await self.analyzer.analys_item(map)
@@ -37,16 +42,20 @@ class P2Arser:
                 logging.info(f"User {msg.chat.full_name} ({msg.chat.id}) got a match on the following words: {found_words}. Map Link: {result.item.map_link}")
         
         self.analyzer.clear_cache()
+        return True
         
         
     async def infinity_analyze(self):
         delay = self.config.get("delay")
         try:
             while True:
-                await self.analyze()
+                result = await self.analyze()
+                if not result:
+                    await asyncio.sleep(60)
+                    continue
                 logging.info(f"Time to sleep {delay} seconds..")
                 await asyncio.sleep(delay)
-        except (asyncio.exceptions.CancelledError, KeyboardInterrupt, asyncio.CancelledError):
+        except KeyboardInterrupt:
             logging.warning("P2Arser analysis stopped")
         
 
