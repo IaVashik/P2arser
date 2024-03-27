@@ -142,7 +142,6 @@ async def help_handler(msg: Message):
     logging_info(msg, "/help")
     
     
-    
 @router.message(Command("about"))
 async def about_handler(msg: Message):
     await msg.answer(ABOUT_BOT)

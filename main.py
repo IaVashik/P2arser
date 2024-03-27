@@ -9,7 +9,7 @@ import json_controller
 from Workshop import P2Arser
 from Telegram import bot
 
-# * Add limits in config & update config
+
 logger_fmt = "%(asctime)s | %(levelname)s | %(message)s"
 coloredlogs.install(level='INFO', fmt=logger_fmt)
 file_handler = logging.FileHandler('logs.log')
