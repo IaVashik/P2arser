@@ -5,10 +5,11 @@ from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 from aiogram.utils import markdown as md
 
-from json_controller import UserData
+from json_controller import UserData, ConfigManager
 
 router = Router()
 user_data: UserData = UserData()
+config = ConfigManager("config.json") # well.. yeah
 
 # todo move it in json file?
 START_INFO = f"""{md.hbold('P2Arser')} is a Telegram bot that helps you track the usage of your assets in new and updated {md.hitalic('Portal 2')} maps on the Steam Workshop.
@@ -75,7 +76,8 @@ async def start_handler(msg: Message):
 async def get_desire_handler(msg: Message):
     id = str(msg.chat.id)
     user_words = user_data.setdefault(id, [])
-    await msg.answer(md.hbold("Your words: ") + "\n• " + '\n• '.join(user_words))
+    user_words_str = '\n• '.join(user_words)
+    await msg.answer(f"{md.hbold('Your words: ')} \n• {user_words_str}\n\nTotal amount: {len(user_words)}") # lmao :P
     logging_info(msg, "/list")
     
 
@@ -86,7 +88,18 @@ async def add_desire_handler(msg: Message, command: CommandObject):
     
     desired_words = parsing_args(command)
     id = str(msg.chat.id)
-    user_data.setdefault(id, []).extend(desired_words)
+    user_list = user_data.setdefault(id, [])
+    words_quota = config.get("user_words_limit")
+    
+    if words_quota > 0 and msg.chat.id != config.get("admin_id"):
+        if len(user_list) >= words_quota:
+            return await msg.answer(f"{md.hbold('Hold on!')} You can't add more words because you've reached your quota of {words_quota} words.")
+        if len(user_list) + len(desired_words) > words_quota:
+            idx = words_quota - len(user_list)
+            desired_words = desired_words[:idx]
+            
+    
+    user_list.extend(desired_words)
     user_data.save_change()
     
     await msg.answer(md.hbold("Added the following words: ") + "\n• " + '\n• '.join(desired_words))
@@ -143,8 +156,7 @@ async def feedback_handler(msg: Message, command: CommandObject, bot: Bot):
         return await msg.answer("Error! Need to provide an argument" + md.hpre("/feedback {your text}"))
 
     try:
-        #! hard code admin id
-        send_msg = await bot.send_message(770277282, f"New feedback by {msg.from_user.full_name} (id: {msg.chat.id})! {md.hpre(command.args)}") 
+        send_msg = await bot.send_message(config.get("admin_id"), f"New feedback by {msg.from_user.full_name} (id: {msg.chat.id})! {md.hpre(command.args)}") 
         await msg.answer(f"Your feedback has been forwarded to the administrator of this bot, @{send_msg.chat.username}")
     except Exception:
         pass

@@ -4,7 +4,7 @@ import WorkshopMetadataExtract as WME
 
 class AnalyzerHandler:
     def __init__(self, config: ConfigManager) -> None:
-        self.config = config
+        self.config = config # TODO use singleton?
 
     
     async def analyze(self, workshop_item: WME.WorkshopItem) -> Union[list[str], None]:

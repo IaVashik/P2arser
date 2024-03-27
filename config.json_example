@@ -4,6 +4,7 @@
     "admin_id": 000000000,
     
     "delay": 800,
+    "user_words_limit": -1,
     
     "check_map_content": false,
     "check_map_description": true,

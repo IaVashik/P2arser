@@ -5,7 +5,6 @@ from typing import Union
 import WorkshopMetadataExtract as WME
 from .handler import AnalyzerHandler
 
-# TODO config read where??
 class BspAnalyzer(AnalyzerHandler):
     async def analyze(self, workshop_item: WME.WorkshopItem) -> Union[list[str], None]:
         logging.debug(f"Bsp Analyzer Handler: start download bsp content ({workshop_item.get_filename()})")
