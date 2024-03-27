@@ -1,6 +1,6 @@
 import logging
 
-from aiogram import Router #, F
+from aiogram import Router, Bot #, F
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 from aiogram.utils import markdown as md
@@ -10,6 +10,7 @@ from json_controller import UserData
 router = Router()
 user_data: UserData = UserData()
 
+# todo move it in json file?
 START_INFO = f"""{md.hbold('P2Arser')} is a Telegram bot that helps you track the usage of your assets in new and updated {md.hitalic('Portal 2')} maps on the Steam Workshop.
 
 {md.hbold('Features:')}
@@ -41,7 +42,6 @@ HELP_TEXT = f"""/help - Displays information about the bot and its available com
 
 {HOW_TO_USE}"""
 
-
 ABOUT_BOT = f"""{md.hbold('P2ARCER')} (pArser + Portal 2 = P2Arser) is a Telegram bot that helps Portal 2 players discover new and updated maps in the Steam Workshop based on keywords. This can be useful if you want to know immediately about the usage of your assets, hehe.
 
 {HOW_TO_USE}
@@ -65,9 +65,7 @@ def logging_info(msg, command_text):
 @router.message(Command("start"))
 async def start_handler(msg: Message):
     id = str(msg.chat.id)
-    if id not in user_data:
-        user_data[id] = []
-        user_data.save_change()
+    user_data.setdefault(id, [])
     
     if msg.chat.type == "private":
         await msg.answer(f"Welcome, {md.hbold(msg.from_user.full_name)}!\n\n{START_INFO}")
@@ -78,7 +76,8 @@ async def start_handler(msg: Message):
 
 @router.message(Command("list"))
 async def get_desire_handler(msg: Message):
-    user_words = user_data[str(msg.chat.id)]
+    id = str(msg.chat.id)
+    user_words = user_data.setdefault(id, [])
     await msg.answer(md.hbold("Your words: ") + "\n• " + '\n• '.join(user_words))
     logging_info(msg, "/list")
     
@@ -90,13 +89,8 @@ async def add_desire_handler(msg: Message, command: CommandObject):
     
     desired_words = parsing_args(command)
     id = str(msg.chat.id)
-    
-    # todo
-    if id in user_data:
-        user_data[id].extend(desired_words) #! there could be duplicates
-        user_data.save_change()
-    else:
-        logging.error("No user info? Huh?")
+    user_data.setdefault(id, []).extend(desired_words)
+    user_data.save_change()
     
     await msg.answer(md.hbold("Added the following words: ") + "\n• " + '\n• '.join(desired_words))
     logging_info(msg, f"/add {desired_words}")
@@ -108,7 +102,8 @@ async def remove_desire_handler(msg: Message, command: CommandObject):
         return await msg.answer("Error! Need to provide an argument" + md.hpre("/remove {desired_word}, {desired_word}, ..."))
     
     desired_words = parsing_args(command)
-    user_words = user_data[str(msg.chat.id)]
+    id = str(msg.chat.id)
+    user_words = user_data.setdefault(id, [])
     
     deleted_words = []
     for word in desired_words:
@@ -123,7 +118,8 @@ async def remove_desire_handler(msg: Message, command: CommandObject):
 
 @router.message(Command("clear"))
 async def clear_handler(msg: Message):
-    user_data[str(msg.chat.id)].clear()
+    id = str(msg.chat.id)
+    user_data.setdefault(id, []).clear()
     user_data.save_change()
     
     await msg.answer("Done!")
@@ -144,11 +140,14 @@ async def about_handler(msg: Message):
     
     
 @router.message(Command("feedback"))
-async def feedback_handler(msg: Message, command: CommandObject):
+async def feedback_handler(msg: Message, command: CommandObject, bot: Bot):
+    logging_info(msg, f"/feedback {command.args}")
     if command.args is None:
         return await msg.answer("Error! Need to provide an argument" + md.hpre("/feedback {your text}"))
 
-    # send_msg = await .send_photo(chat_id=chat_id, caption=text, photo=thumbnail_url)
-    # await msg.answer(f"Your feedback has been forwarded to the administrator of this bot, {}")
-    await msg.answer("Sorry, but it's TODO func")
-    logging_info(msg, f"/feedback {command.args}")
+    try:
+        #! hard code admin id
+        send_msg = await bot.send_message(770277282, f"New feedback by {msg.from_user.full_name} (id: {msg.chat.id})! {md.hpre(command.args)}") 
+        await msg.answer(f"Your feedback has been forwarded to the administrator of this bot, @{send_msg.chat.username}")
+    except Exception:
+        pass

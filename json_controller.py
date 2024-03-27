@@ -23,6 +23,9 @@ class JsonManager:
     def get(self, key):
         return self.data.get(key, None)
     
+    def setdefault(self, key, default):
+        return self.data.setdefault(key, default)
+    
     def __getitem__(self, idx):
         return self.get(idx)
     
@@ -54,6 +57,9 @@ class UserData(object):
     
     def get(self, key):
         return self.data.get(str(key), None)
+    
+    def setdefault(self, key, default):
+        return self.data.setdefault(key, default)
     
     def __getitem__(self, idx):
         return self.get(idx)
