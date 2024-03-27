@@ -4,9 +4,10 @@ import WorkshopMetadataExtract as WME
 
 from settings import ConfigManager
 
-from .handler import AnalyzerHandler
-from .item_bsp import BspAnalyzer
-from .item_description import DescriptionAnalyzer
+from .handlers import handler
+from .handlers import item_bsp
+from .handlers import item_description
+
 from .result import AnalyzerResult
 
 
@@ -21,9 +22,9 @@ class Analyzer:
         self.config = config
         self.processed = []
         
-        self.analyzers: list[AnalyzerHandler] = [
-            BspAnalyzer(config).is_valid(),
-            DescriptionAnalyzer(config).is_valid()
+        self.analyzers: list[handler.AnalyzerHandler] = [
+            item_bsp.BspAnalyzer(config).is_valid(),
+            item_description.DescriptionAnalyzer(config).is_valid()
         ]
         
         if all(element is None for element in self.analyzers):
@@ -64,5 +65,5 @@ class Analyzer:
     def clear_cache(self):
         self.processed.clear()
 
-    def add_analyzer(self, handler: AnalyzerHandler):
+    def add_analyzer(self, handler: handler.AnalyzerHandler):
         self.analyzers.append(handler.is_valid())

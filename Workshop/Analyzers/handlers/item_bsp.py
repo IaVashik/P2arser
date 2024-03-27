@@ -1,6 +1,5 @@
 import logging
 import aiohttp
-from tqdm import tqdm
 
 from typing import Union
 import WorkshopMetadataExtract as WME
