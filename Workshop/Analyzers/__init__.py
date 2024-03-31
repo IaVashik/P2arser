@@ -1,5 +1,6 @@
 import logging
 import datetime
+from collections import deque
 import WorkshopMetadataExtract as WME
 
 from json_controller import ConfigManager
@@ -10,17 +11,21 @@ from .handlers import item_description
 
 from .result import AnalyzerResult
 
-
-def get_item_type(workshop_item: WME.WorkshopItem):
-    if workshop_item.get_time_updated() == workshop_item.get_time_created():
-        return "New map"
-    return "Map Update"
+class ItemType:
+    New = "New Map"
+    Update = "Map Update"
+    
+    def get(workshop_item: WME.WorkshopItem):
+        if workshop_item.get_time_updated() == workshop_item.get_time_created():
+            return ItemType.New
+        return ItemType.Update
 
 
 class Analyzer:
     def __init__(self, config: ConfigManager) -> None:
-        self.config = config
-        self.processed = []
+        # self.config = config
+        self.delay = config.get("delay")
+        self.processed = deque(maxlen=100) # mb use `OrderedDict`?
         
         self.analyzers: list[AnalyzerHandler] = [
             item_bsp.BspAnalyzer(config).is_valid(),
@@ -38,15 +43,17 @@ class Analyzer:
         timedelta = (time - map_updated_time).total_seconds()
     
         map_id = workshop_item.get_fileid()
+        upload_type = ItemType.get(workshop_item)
         
         # if this map already processed or ...todo
-        if map_id in self.processed and timedelta > self.config.get("delay"): 
+        if upload_type == ItemType.Update and timedelta > self.delay:
+            return None
+        if map_id in self.processed: 
             return None
         
         # todo comment
         self.processed.append(map_id)
         
-        upload_type = get_item_type(workshop_item)
         megabytes_value = workshop_item.get_file_size() / 1024 / 1024
         
         logging.info(f"Main Analyzer ({upload_type}): \033[33m{workshop_item.get_title()}\033[0m")

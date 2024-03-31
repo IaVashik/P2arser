@@ -41,7 +41,6 @@ class P2Arser:
                 msg = await self.send_info(int(chat_id), custom_msg_text, result.item.get_preview_url())
                 logging.info(f"User {msg.chat.full_name} ({msg.chat.id}) got a match on the following words: {found_words}. Map Link: {result.item.map_link}")
         
-        self.analyzer.clear_cache()
         return True
         
         
